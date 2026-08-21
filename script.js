@@ -8,10 +8,13 @@ const menu = {
   alcohol: [['Amstel 500 ml','4,00€'],['Amstel 330 ml','1,80€'],['Heineken 500 ml','4,00€'],['Heineken 330 ml','1,80€'],['Fix 500ml','4,00€'],['Fix 330ml','1,80€'],['Άλφα 500 ml','4,00€'],['Άλφα 330 ml','1,80€'],['Μύθος 500 ml','4,00€'],['Μύθος 330 ml','1,80€'],['Κρασί λευκό / κόκκινο 0,5 lt','4,50€'],['Κρασί λευκό / κόκκινο 1 lt','8,50€']]
 };
 const list = document.querySelector('#menu-list');
+let revealObserver;
 const ingredients = [['Ψωμάκι λευκό','0,90€'],['Τυρί edam','0,90€'],['Φέτα','2,00€'],['Μανούρι','2,00€'],['Γραβιέρα','2,00€'],['Κρέμα Φιλαδέλφεια','0,80€'],['Ζαμπόν','0,90€'],['Γαλοπούλα καπνιστή','1,00€'],['Μπέικον','1,00€'],['Σαλάμι αέρος','1,00€'],['Λουκάνικο Φρανκφούρτης','2,00€'],['Λουκάνικο χωριάτικο','2,00€'],['Κοτόπουλο φιλέτο','2,20€'],['Μπιφτέκι χειροποίητο','2,20€'],['Αυγό','0,80€'],['Ομελέτα','0,80€'],['Ντομάτα','0,70€'],['Πιπεριά πράσινη','0,70€'],['Αγγούρι','0,40€'],['Μαρούλι','0,40€'],['Κρεμμύδι','0,40€'],['Μανιτάρια φρέσκα','1,20€'],['Ελιές','0,80€'],['Πατάτες τηγανητές','0,80€'],['Chips','0,70€'],['Μαγιονέζα','0,70€'],['Sauce','0,70€'],['Τυροσαλάτα','0,90€'],['Ρώσικη σαλάτα','0,90€'],['Γιαούρτι','0,90€'],['Τζατζίκι','0,90€'],['Κέτσαπ / μουστάρδα','0,30€']];
 function render(category) {
   list.innerHTML = menu[category].map(([name, price, description]) => `<article class="menu-item"><div><h3>${name}</h3>${description ? `<p>${description}</p>` : ''}</div><span class="price">${price}</span></article>`).join('');
   if (category === 'baguettes') list.innerHTML += `<div class="ingredient-list"><h4>Υλικά για το δικό σου toast ή sandwich</h4><p>Βάση 0,90€ και πρόσθεσε ό,τι θέλεις:</p><div class="ingredient-grid">${ingredients.map(([name, price]) => `<span>${name}<b>${price}</b></span>`).join('')}</div></div>`;
+  list.querySelectorAll('.menu-item').forEach(item => item.classList.add('reveal-item'));
+  observeReveals();
 }
 document.querySelectorAll('.category-tabs button').forEach(button => button.addEventListener('click', () => {
   document.querySelector('.category-tabs .active').classList.remove('active');
@@ -19,6 +22,15 @@ document.querySelectorAll('.category-tabs button').forEach(button => button.addE
   render(button.dataset.category);
 }));
 render('coffee');
+document.querySelectorAll('section:not(.hero), footer').forEach(section => section.classList.add('reveal'));
+revealObserver = new IntersectionObserver(entries => entries.forEach(entry => {
+  if (entry.isIntersecting) { entry.target.classList.add('is-visible'); revealObserver.unobserve(entry.target); }
+}), { threshold: 0.12 });
+function observeReveals() {
+  if (!revealObserver) return;
+  document.querySelectorAll('.reveal, .reveal-item').forEach(element => revealObserver.observe(element));
+}
+observeReveals();
 const toggle = document.querySelector('.menu-toggle');
 toggle.addEventListener('click', () => {
   const open = toggle.getAttribute('aria-expanded') === 'true';
